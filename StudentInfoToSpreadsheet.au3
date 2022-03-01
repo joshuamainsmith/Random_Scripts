@@ -191,14 +191,12 @@ If @error Then
 
 ; Bring Browser to the foreground
 WinActivate($hWndBrowser, "")
-WinActivate($hWndBrowser, "")
-WinActivate($hWndBrowser, "")
 
 Sleep($delay * 10)
 
 ;;; Check to see if browser is open on spreadsheet
 ; Get the handle of the Browser window via Class
-Local $hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Mozilla Firefox")
+$hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Mozilla Firefox")
 
 ; Display an error message if there was a problem in getting the window handle (make sure webpage is open)
 If @error Then
@@ -306,61 +304,35 @@ While $iRowNum < $rowNumber
    ; Enter student name
    Send($aWords[$j][0] & " " & $aWords[$j][1])
 
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 3)
 
    ; Enter Address
    Send($aWords[$j][4])
-
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 3)
 
    ; Enter City
    Send($aWords[$j][5])
-
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 2)
 
    ; Enter Zip
    Send($aWords[$j][6])
-
    Send("{TAB}")
 
    ; Enter phone
    Send($aWords[$j][8])
-
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 2)
 
    ; Enter Email
    Send($aWords[$j][7])
-
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 2)
    Send("{SPACE}")
 
    ; Navigate to Weight
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 13)
 
    ; Weight
    Send("3")
-
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 2)
 
    ; Dimensions
    Send("16")
@@ -372,35 +344,19 @@ While $iRowNum < $rowNumber
    Send("3")
    Send("{TAB}")
 
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 5)
 
    ; Value
    Send("250")
 
    ; Navigate to Other Reference
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
-   Send("{TAB}")
+   Call("sendTabs", 16)
 
    ; Value
    Send("Student Tablet")
+
+   $j = $j + 1
+   $iRowNum = $iRowNum + 1
 
    ; Ask user to navigate to the UPS shipping page
 $iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Ensure to put in the state and verify info" & @LF & "Continue the script after the current student is finished" & @LF & "Click Yes to continue the script")
@@ -414,6 +370,15 @@ WEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; Functions ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Click TAB $num of times
+Func sendTabs($num)
+   Local $itr = 0;
+   While $itr < $num
+	  Send("{TAB}")
+	  $itr = $itr + 1
+   WEnd
+EndFunc
 
 ; Function that copies elements in student master and copies
 ; elements from clipboard to an array
