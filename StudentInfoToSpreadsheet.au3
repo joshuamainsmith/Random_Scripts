@@ -2,6 +2,7 @@
 #include <AutoItConstants.au3>
 #include <MsgBoxConstants.au3>
 #include <Date.au3>
+#include <WinAPISysWin.au3>
 
 ; Press the ESC key to terminate the script
 HotKeySet("{ESC}", "Terminate")
@@ -21,7 +22,7 @@ HotKeySet("{ESC}", "Terminate")
 ;;;;; Globals ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-$delay = 100 ; delay used to control the speed of clicking, copy/paste, etc.
+$delay = 150 ; delay used to control the speed of clicking, copy/paste, etc.
 
 ; Might need these for shipping portion (future)
 $color1 = 0x000000 ; color of the text in Contact Manager (black)
@@ -60,16 +61,16 @@ WinActivate($hWndCNS)
 ;;;;; Opening Contact Manager ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
- Click Daily
+ ;Click Daily
 ;MouseClick("left", 165, 35, 1)
 
- Click Contact Manager
+;Click Contact Manager
 ;MouseClick("left", 210, 55, 1, 30)
 
- Click Sub Contact Manager
+;Click Sub Contact Manager
 ;MouseClick("left", 410, 55, 1, 30)
 
- Click State Column (sorts by state)
+; Click State Column (sorts by state)
 ;MouseClick("left", 1025, 390, 1)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -180,6 +181,15 @@ WEnd
 
 Sleep($delay * 10)
 
+Local $aList = _WinAPI_EnumWindowsTop ( )
+
+For $i = 1 To $aList[0][0]
+    If $aList[$i][1] = "MozillaWindowClass" Then
+        WinActivate($aList[$i][0])
+        Exit
+    EndIf
+Next
+
 ; Get the handle of the Browser window via Class
 Local $hWndBrowser = WinGetHandle("[CLASS:MozillaWindowClass]")
 
@@ -208,6 +218,8 @@ If @error Then
 		Sleep($delay * 5)
 		Send("{ENTER}")
 	 EndIf
+
+WinActivate($hWndWebpage, "")
 
 Sleep($delay * 20)
 
@@ -377,6 +389,7 @@ Func sendTabs($num)
    While $itr < $num
 	  Send("{TAB}")
 	  $itr = $itr + 1
+	  Sleep($delay)
    WEnd
 EndFunc
 
