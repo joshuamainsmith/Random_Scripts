@@ -22,7 +22,7 @@ HotKeySet("{ESC}", "Terminate")
 ;;;;; Globals ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-$delay = 150 ; delay used to control the speed of clicking, copy/paste, etc.
+$delay = 125 ; delay used to control the speed of clicking, copy/paste, etc.
 
 ; Might need these for shipping portion (future)
 $color1 = 0x000000 ; color of the text in Contact Manager (black)
@@ -186,7 +186,6 @@ Local $aList = _WinAPI_EnumWindowsTop ( )
 For $i = 1 To $aList[0][0]
     If $aList[$i][1] = "MozillaWindowClass" Then
         WinActivate($aList[$i][0])
-        Exit
     EndIf
 Next
 
@@ -354,7 +353,6 @@ While $iRowNum < $rowNumber
    Send("{TAB}")
 
    Send("3")
-   Send("{TAB}")
 
    Call("sendTabs", 5)
 
