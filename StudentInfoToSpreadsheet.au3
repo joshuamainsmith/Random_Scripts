@@ -244,26 +244,30 @@ $j = 0
 While $iRowNum < $rowNumber
 
    ; Enter student name
-   Send($aWords[$j][$i] & " " & $aWords[$j][$i + 1])
+   Send($aWords[$j][$i] & " " & $aWords[$j][$i + 1], 1)
    $i = $i + 2
 
    Send("{RIGHT}")
 
    ; Enter student Number
-   Send($aWords[$j][$i])
+   Send($aWords[$j][$i], 1)
    $i = $i + 1
 
    Send("{RIGHT}")
+
+   ; Enter Campus
+   Send("Van")
+
    Send("{RIGHT}")
 
    ; Enter expected start date
-   Send($aWords[$j][$i])
+   Send($aWords[$j][$i], 1)
    $i = $i + 1
 
    Send("{RIGHT}")
 
    ; Enter in the shipping date
-   Send(_NowDate())
+   Send(_NowDate(), 1)
 
    ; Go to next empty row
    Send("{DOWN}")
@@ -313,37 +317,37 @@ While $iRowNum < $rowNumber
    MouseClick("left", 370, 695, 1)
 
    ; Enter student name
-   Send($aWords[$j][0] & " " & $aWords[$j][1])
+   Send($aWords[$j][0] & " " & $aWords[$j][1], 1)
 
    Call("sendTabs", 3)
 
    ; Enter Address
-   Send($aWords[$j][4])
+   Send($aWords[$j][4], 1)
    Call("sendTabs", 3)
 
    ; Enter City
-   Send($aWords[$j][5])
+   Send($aWords[$j][5], 1)
    Call("sendTabs", 2)
 
    ; Enter Zip
-   Send($aWords[$j][6])
+   Send($aWords[$j][6], 1)
    Send("{TAB}")
 
    ; Enter phone
-   Send($aWords[$j][8])
+   Send($aWords[$j][8], 1)
    Call("sendTabs", 2)
 
    ; Enter Email
-   Send($aWords[$j][7])
+   Send($aWords[$j][7], 1)
    Call("sendTabs", 2)
    Send("{SPACE}")
 
    ; Navigate to Weight
-   Call("sendTabs", 13)
+   Call("sendTabs", 10)
 
    ; Weight
    Send("3")
-   Call("sendTabs", 2)
+   Call("sendTabs", 1)
 
    ; Dimensions
    Send("16")
@@ -353,8 +357,7 @@ While $iRowNum < $rowNumber
    Send("{TAB}")
 
    Send("3")
-
-   Call("sendTabs", 5)
+   Call("sendTabs", 3)
 
    ; Value
    Send("250")
