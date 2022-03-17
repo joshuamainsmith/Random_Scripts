@@ -437,9 +437,9 @@ Func Terminate()
 		Local $test = "blah"
 
         GUICtrlCreateTabItem("Control")
-        Local $id1 = GUICtrlCreateButton("Beginning", 10, 40, 120, 20)
-        Local $id2 = GUICtrlCreateButton("Spreadsheet", 10, 70, 120, 20)
-		Local $id3 = GUICtrlCreateButton("Shipping", 10, 100, 120, 20)
+        Local $id1 = GUICtrlCreateButton("Beginning", 10, 40, 100, 20)
+        Local $id2 = GUICtrlCreateButton("Spreadsheet", 110, 40, 100, 20)
+		Local $id3 = GUICtrlCreateButton("Shipping", 210, 40, 100, 20)
 
 		GUICtrlCreateTabItem("Student Info")
 		;Local $idComboBox = GUICtrlCreateCombo("", 20, 50, 160, 150)
@@ -450,7 +450,7 @@ Func Terminate()
 
 		 ; Create GenericCombo
 		 $hGenericCombo = GUICtrlCreateCombo("", 10, 40, 100, 20)
-		 GUICtrlSetData(-1, $aWords[0][0]&"|Option B")
+		 GUICtrlSetData(-1, $aWords[0][0]&"|"&$aWords[1][0]&"|"&$aWords[2][0]&"|"&$aWords[3][0]&"|"&$aWords[4][0]&"|"&$aWords[5][0]&"|"&$aWords[6][0]&"|"&$aWords[7][0]&"|"&$aWords[8][0]&"|"&$aWords[9][0]&"|"&$aWords[10][0]&"|"&$aWords[11][0]&"|"&$aWords[12][0]&"|"&$aWords[13][0]&"|"&$aWords[14][0]&"|"&$aWords[15][0]&"|"&$aWords[16][0]&"|"&$aWords[17][0]&"|"&$aWords[18][0]&"|"&$aWords[19][0])
 		 _GUICtrlComboBox_SetEditText($hGenericCombo, "Select")  ; Sets the text, but does not add to the list for selection
 
 		 ; Create subordinate combos and hide them
@@ -504,11 +504,18 @@ Func Terminate()
 				 $sCurrGenericData = $sGenericData
 				 ; Hide/Show the combos depending on the selection
 				 Switch $sGenericData
-					 Case $aWords[0][0]
-						 GUICtrlSetState($hGuiBoxForB1, $GUI_HIDE)
-						 GUICtrlSetState($hGuiBoxForB2, $GUI_HIDE)
-						 GUICtrlSetState($hGuiBoxForA1, $GUI_SHOW)
-						 GUICtrlSetState($hGuiBoxForA2, $GUI_SHOW)
+				 Case $aWords[0][0]
+					Local $it = 0
+					Local $ySpace = 100
+					While $it < 9
+					   GUICtrlCreateLabel($aWords[0][$it], 10, $ySpace, 200, 50)
+					   $it = $it + 1
+					   $ySpace = $ySpace + 20
+					 WEnd
+						 ;GUICtrlSetState($hGuiBoxForB1, $GUI_HIDE)
+						 ;GUICtrlSetState($hGuiBoxForB2, $GUI_HIDE)
+						 ;GUICtrlSetState($hGuiBoxForA1, $GUI_SHOW)
+						 ;GUICtrlSetState($hGuiBoxForA2, $GUI_SHOW)
 					 Case "Option B"
 						 GUICtrlSetState($hGuiBoxForA1, $GUI_HIDE)
 						 GUICtrlSetState($hGuiBoxForA2, $GUI_HIDE)
