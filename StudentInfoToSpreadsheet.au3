@@ -1,6 +1,7 @@
 #include <File.au3>
 #include <AutoItConstants.au3>
 #include <GUIConstantsEx.au3>
+#include <GUIComboBox.au3>
 #include <MsgBoxConstants.au3>
 #include <Date.au3>
 #include <WinAPISysWin.au3>
@@ -425,7 +426,7 @@ EndFunc
 
 ; Function to terminate script with ESC being the hotkey
 Func Terminate()
-   GUICreate("Menu") ; will create a dialog box that when displayed is centered
+   $hGUI = GUICreate("Menu") ; will create a dialog box that when displayed is centered
 
    GUISetBkColor(0x00E0FFFF)
    GUISetFont(9, 300)
@@ -441,23 +442,31 @@ Func Terminate()
 		Local $id3 = GUICtrlCreateButton("Shipping", 10, 100, 120, 20)
 
 		GUICtrlCreateTabItem("Student Info")
-		 ; Loop Variables
-		 Local $iRN = 0
-		 Local $it = 0
-		 Local $jit = 0
+		;Local $idComboBox = GUICtrlCreateCombo("", 20, 50, 160, 150)
+        ;GUICtrlSetData($idComboBox, $aWords[0][0]&"|"&$aWords[1][0]&"|"&$aWords[2][0]&"|"&$aWords[3][0]&"|"&$aWords[4][0]&"|"&$aWords[5][0]&"|"&$aWords[6][0]&"|"&$aWords[7][0]&"|"&$aWords[8][0]&"|"&$aWords[9][0]&"|"&$aWords[10][0]&"|"&$aWords[11][0]&"|"&$aWords[12][0]&"|"&$aWords[13][0]&"|"&$aWords[14][0]&"|"&$aWords[15][0]&"|"&$aWords[16][0]&"|"&$aWords[17][0]&"|"&$aWords[18][0]&"|"&$aWords[19][0], $aWords[0][0]); default Jon
 
-		 ; Iterating through each student
-		 While $iRN < $rowNumber
-			$it = 0
-			While $it < 9
-			   GUICtrlCreateInput($aWords[$jit][$it], 10, 50, 300, 300)
-			   $it = $it + 1
-			WEnd
+		; Cuurent GenericCombo text
+		 $sCurrGenericData = ""
 
-			$jit = $jit + 1
-			$iRN = $iRN + 1
-		 WEnd
+		 ; Create GenericCombo
+		 $hGenericCombo = GUICtrlCreateCombo("", 10, 40, 100, 20)
+		 GUICtrlSetData(-1, $aWords[0][0]&"|Option B")
+		 _GUICtrlComboBox_SetEditText($hGenericCombo, "Select")  ; Sets the text, but does not add to the list for selection
 
+		 ; Create subordinate combos and hide them
+		 $hGuiBoxForA1 = GUICtrlCreateCombo("",  10, 100, 100, 20)
+		 GUICtrlSetData(-1, "Blah A 1.1|Blah A 1.2")
+		 GUICtrlSetState(-1, $GUI_HIDE)
+		 $hGuiBoxForA2 = GUICtrlCreateCombo("", 260, 100, 100, 20)
+		 GUICtrlSetData(-1, "Blah A 2.1|Blah A 2.2")
+		 GUICtrlSetState(-1, $GUI_HIDE)
+
+		 $hGuiBoxForB1 = GUICtrlCreateCombo("",  10, 100, 100, 20)
+		 GUICtrlSetData(-1, "Blah B 1.1|Blah B 1.2")
+		 GUICtrlSetState(-1, $GUI_HIDE)
+		 $hGuiBoxForB2 = GUICtrlCreateCombo("", 260, 100, 100, 20)
+		 GUICtrlSetData(-1, "Blah B 2.1|Blah B 2.2")
+		 GUICtrlSetState(-1, $GUI_HIDE)
 
 		 ; Close Tab definiton
 		 GUICtrlCreateTabItem("")
@@ -482,7 +491,31 @@ Func Terminate()
 						Case $idMsg = $id3
                                 shipping()
 								ExitLoop
-                EndSelect
+							 ;Case $idMsg = $idComboBox
+								;GUICtrlCreateLabel("label1", 30, 80, 50, 20)
+                                ;MsgBox($MB_SYSTEMMODAL, "", "The combobox is currently displaying: " &$idComboBox)
+							 EndSelect
+
+			   ; Read GenericCombo selection
+			 $sGenericData = GUICtrlRead($hGenericCombo)
+			 ; If it has changed AND the combo is closed - if we do not check for closure, the code actions while we scan the dropdown list
+			 If $sGenericData <> $sCurrGenericData And _GUICtrlComboBox_GetDroppedState($hGenericCombo) = False Then
+				 ; Reset the current text so prevent flicker from constant redrawing
+				 $sCurrGenericData = $sGenericData
+				 ; Hide/Show the combos depending on the selection
+				 Switch $sGenericData
+					 Case $aWords[0][0]
+						 GUICtrlSetState($hGuiBoxForB1, $GUI_HIDE)
+						 GUICtrlSetState($hGuiBoxForB2, $GUI_HIDE)
+						 GUICtrlSetState($hGuiBoxForA1, $GUI_SHOW)
+						 GUICtrlSetState($hGuiBoxForA2, $GUI_SHOW)
+					 Case "Option B"
+						 GUICtrlSetState($hGuiBoxForA1, $GUI_HIDE)
+						 GUICtrlSetState($hGuiBoxForA2, $GUI_HIDE)
+						 GUICtrlSetState($hGuiBoxForB1, $GUI_SHOW)
+						 GUICtrlSetState($hGuiBoxForB2, $GUI_SHOW)
+				 EndSwitch
+			 EndIf
         WEnd
     Exit
 EndFunc   ;==>Terminate
