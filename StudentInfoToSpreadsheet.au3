@@ -1,5 +1,6 @@
 #include <File.au3>
 #include <AutoItConstants.au3>
+#include <GUIConstantsEx.au3>
 #include <MsgBoxConstants.au3>
 #include <Date.au3>
 #include <WinAPISysWin.au3>
@@ -54,332 +55,346 @@ If @error Then
         Exit
 	 EndIf
 
-; Bring CNS to the foreground
-WinActivate($hWndCNS)
+start()
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;; Opening Contact Manager ;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Func start()
 
- ;Click Daily
-;MouseClick("left", 165, 35, 1)
+   ; Bring CNS to the foreground
+   WinActivate($hWndCNS)
 
-;Click Contact Manager
-;MouseClick("left", 210, 55, 1, 30)
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;; Opening Contact Manager ;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;Click Sub Contact Manager
-;MouseClick("left", 410, 55, 1, 30)
+	;Click Daily
+   ;MouseClick("left", 165, 35, 1)
 
-; Click State Column (sorts by state)
-;MouseClick("left", 1025, 390, 1)
+   ;Click Contact Manager
+   ;MouseClick("left", 210, 55, 1, 30)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;; Copy Student Info Into Array ;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;Click Sub Contact Manager
+   ;MouseClick("left", 410, 55, 1, 30)
 
-; MsgBox($MB_SYSTEMMODAL, "", "Make sure the list is sorted by state" & @LF & "Click OK to continue")
+   ; Click State Column (sorts by state)
+   ;MouseClick("left", 1025, 390, 1)
 
-; Loop Variables
-Local $iRowNum = 0
-Local $i = 0
-Local $j = 0
-Local $curRow = $rowStart
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;; Copy Student Info Into Array ;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-While $iRowNum < $rowNumber
-   ; Click Start Row
-   MouseClick("left", 470, 390 + $curRow * 15, 1)
+   ; MsgBox($MB_SYSTEMMODAL, "", "Make sure the list is sorted by state" & @LF & "Click OK to continue")
 
-   ; Click Student Folder
-   MouseClick("left", 15, 100, 1)
+   ; Loop Variables
+   Local $iRowNum = 0
+   Local $i = 0
+   Local $j = 0
+   Local $curRow = $rowStart
 
-   Sleep($delay)
+   While $iRowNum < $rowNumber
+	  ; Click Start Row
+	  MouseClick("left", 470, 390 + $curRow * 15, 1)
 
-   ; Click Edit
-   MouseClick("left", 1080, 785, 1)
+	  ; Click Student Folder
+	  MouseClick("left", 15, 100, 1)
+
+	  Sleep($delay)
+
+	  ; Click Edit
+	  MouseClick("left", 1080, 785, 1)
+
+	  Sleep($delay * 10)
+
+	  ; Copy First Name
+	  Call("sInfo", 1050, 380, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Last Name
+	  Call("sInfo", 875, 380, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Student Number
+	  Call("sInfo", 1190, 360, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Expected Start
+	  Call("sInfo", 1180, 605, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Address
+	  Call("sInfo", 960, 440, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy City
+	  Call("sInfo", 875, 470, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Zip Code - double click
+	  MouseClick("left", 1000, 470, 1)
+	  Call("sInfo", 1000, 470, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Email - double click
+	  MouseClick("left", 1000, 620, 1)
+	  Call("sInfo", 1000, 620, $j, $i)
+	  $i = $i + 1
+
+	  ; Copy Phone - Click and drag
+	  PixelSearch(780, 575, 850, 580, $color1)
+	  If Not @error Then
+		 MouseClickDrag($MOUSE_CLICK_LEFT, 870, 580, 770, 580)
+
+	  ; Copy selected text
+	  Send("^c")
+
+	  Sleep($delay * 5)
+
+	  $aWords[$j][$i] = ClipGet()
+
+		 Else
+		 MouseClickDrag($MOUSE_CLICK_LEFT, 870, 515, 770, 515)
+
+	  ; Copy selected text
+	  Send("^c")
+
+	  Sleep($delay * 5)
+
+	  $aWords[$j][$i] = ClipGet()
+	  EndIf
+
+	  ; Display the data returned by ClipGet.
+		  ;MsgBox($MB_SYSTEMMODAL, "", "The following data is stored in the clipboard: " & @CRLF & $aWords[$j][4] & " " & $aWords[$j][5] & " " & $aWords[$j][6] & " " & $aWords[$j][7]  & " " & $aWords[$j][8])
+
+	  $i = 0
+	  $j = $j + 1
+	  $iRowNum = $iRowNum + 1
+	  $curRow = $curRow + 1
+
+	  ; Click Cancel Button
+	  MouseClick("left", 1200, 785, 1)
+
+	  ; Click Close Button
+	  MouseClick("left", 1265, 785, 1)
+   WEnd
+
+   spreadsheet()
+EndFunc
+
+Func spreadsheet()
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;; Switch to Browser w/Spreadsheet ;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+   ; Minimize CNS
+	  ;MouseClick("left", 1765, 10, 1)
 
    Sleep($delay * 10)
 
-   ; Copy First Name
-   Call("sInfo", 1050, 380, $j, $i)
-   $i = $i + 1
+   Local $aList = _WinAPI_EnumWindowsTop ( )
 
-   ; Copy Last Name
-   Call("sInfo", 875, 380, $j, $i)
-   $i = $i + 1
+   For $i = 1 To $aList[0][0]
+	   If $aList[$i][1] = "MozillaWindowClass" Then
+		   WinActivate($aList[$i][0])
+	   EndIf
+   Next
 
-   ; Copy Student Number
-   Call("sInfo", 1190, 360, $j, $i)
-   $i = $i + 1
+   ; Get the handle of the Browser window via Class
+   Local $hWndBrowser = WinGetHandle("[CLASS:MozillaWindowClass]")
 
-   ; Copy Expected Start
-   Call("sInfo", 1180, 605, $j, $i)
-   $i = $i + 1
+   ; Display an error message if there was a problem in getting the window handle (make sure browser is open)
+   If @error Then
+		   MsgBox($MB_SYSTEMMODAL, "", "An error occurred when trying to retrieve the window handle of Browser")
+		   Exit
+		EndIf
 
-   ; Copy Address
-   Call("sInfo", 960, 440, $j, $i)
-   $i = $i + 1
+   ; Bring Browser to the foreground
+   WinActivate($hWndBrowser, "")
 
-   ; Copy City
-   Call("sInfo", 875, 470, $j, $i)
-   $i = $i + 1
+   Sleep($delay * 10)
 
-   ; Copy Zip Code - double click
-   MouseClick("left", 1000, 470, 1)
-   Call("sInfo", 1000, 470, $j, $i)
-   $i = $i + 1
+   ;;; Check to see if browser is open on spreadsheet
+   ; Get the handle of the Browser window via Class
+   $hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Mozilla Firefox")
 
-   ; Copy Email - double click
-   MouseClick("left", 1000, 620, 1)
-   Call("sInfo", 1000, 620, $j, $i)
-   $i = $i + 1
+   ; Display an error message if there was a problem in getting the window handle (make sure webpage is open)
+   If @error Then
+		   Send("^t")
+		   Sleep($delay * 5)
+		   ClipPut("https://prospectedu-my.sharepoint.com/:x:/r/personal/william_christensen_prospecteducation_com/_layouts/15/Doc.aspx?sourcedoc=%7BAE32C238-0CF9-4E31-A2AF-75570AF50491%7D&file=Student%20Computer%20Tracking.xlsx")
+		   Sleep($delay)
+		   Send("^v")
+		   Sleep($delay * 5)
+		   Send("{ENTER}")
+		EndIf
 
-   ; Copy Phone - Click and drag
-   PixelSearch(780, 575, 850, 580, $color1)
-   If Not @error Then
-	  MouseClickDrag($MOUSE_CLICK_LEFT, 870, 580, 770, 580)
-
-   ; Copy selected text
-   Send("^c")
-
-   Sleep($delay * 5)
-
-   $aWords[$j][$i] = ClipGet()
-
-	  Else
-	  MouseClickDrag($MOUSE_CLICK_LEFT, 870, 515, 770, 515)
-
-   ; Copy selected text
-   Send("^c")
-
-   Sleep($delay * 5)
-
-   $aWords[$j][$i] = ClipGet()
-   EndIf
-
-   ; Display the data returned by ClipGet.
-	   ;MsgBox($MB_SYSTEMMODAL, "", "The following data is stored in the clipboard: " & @CRLF & $aWords[$j][4] & " " & $aWords[$j][5] & " " & $aWords[$j][6] & " " & $aWords[$j][7]  & " " & $aWords[$j][8])
-
-   $i = 0
-   $j = $j + 1
-   $iRowNum = $iRowNum + 1
-   $curRow = $curRow + 1
-
-   ; Click Cancel Button
-   MouseClick("left", 1200, 785, 1)
-
-   ; Click Close Button
-   MouseClick("left", 1265, 785, 1)
-WEnd
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;; Switch to Browser w/Spreadsheet ;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; Minimize CNS
-   ;MouseClick("left", 1765, 10, 1)
-
-Sleep($delay * 10)
-
-Local $aList = _WinAPI_EnumWindowsTop ( )
-
-For $i = 1 To $aList[0][0]
-    If $aList[$i][1] = "MozillaWindowClass" Then
-        WinActivate($aList[$i][0])
-    EndIf
-Next
-
-; Get the handle of the Browser window via Class
-Local $hWndBrowser = WinGetHandle("[CLASS:MozillaWindowClass]")
-
-; Display an error message if there was a problem in getting the window handle (make sure browser is open)
-If @error Then
-        MsgBox($MB_SYSTEMMODAL, "", "An error occurred when trying to retrieve the window handle of Browser")
-        Exit
-	 EndIf
-
-; Bring Browser to the foreground
-WinActivate($hWndBrowser, "")
-
-Sleep($delay * 10)
-
-;;; Check to see if browser is open on spreadsheet
-; Get the handle of the Browser window via Class
-$hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Mozilla Firefox")
-
-; Display an error message if there was a problem in getting the window handle (make sure webpage is open)
-If @error Then
-        Send("^t")
-		Sleep($delay * 5)
-		ClipPut("https://prospectedu-my.sharepoint.com/:x:/r/personal/william_christensen_prospecteducation_com/_layouts/15/Doc.aspx?sourcedoc=%7BAE32C238-0CF9-4E31-A2AF-75570AF50491%7D&file=Student%20Computer%20Tracking.xlsx")
-		Sleep($delay)
-		Send("^v")
-		Sleep($delay * 5)
-		Send("{ENTER}")
-	 EndIf
-
-WinActivate($hWndWebpage, "")
-
-Sleep($delay * 20)
-
-; Click Student Name Column
-MouseClick("left", 620, 440, 1)
-
-Sleep($delay * 10)
-
-; Go to the bottom of the column
-Send("^{DOWN}")
-Sleep($delay * 10)
-Send("{DOWN}")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;; Paste Student Info to Spreadsheet ;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; Loop Variables
-$iRowNum = 0
-$i = 0
-$j = 0
-
-While $iRowNum < $rowNumber
-
-   ; Enter student name
-   Send($aWords[$j][$i] & " " & $aWords[$j][$i + 1], 1)
-   $i = $i + 2
-
-   Send("{RIGHT}")
-
-   ; Enter student Number
-   Send($aWords[$j][$i], 1)
-   $i = $i + 1
-
-   Send("{RIGHT}")
-
-   ; Enter Campus
-   Send("Van")
-
-   Send("{RIGHT}")
-
-   ; Enter expected start date
-   Send($aWords[$j][$i], 1)
-   $i = $i + 1
-
-   Send("{RIGHT}")
-
-   ; Enter in the shipping date
-   Send(_NowDate(), 1)
-
-   ; Go to next empty row
-   Send("{DOWN}")
-   Send("{LEFT}")
-   Send("{LEFT}")
-   Send("{LEFT}")
-   Send("{LEFT}")
-
-   $i = 0
-   $j = $j + 1
-   $iRowNum = $iRowNum + 1
-WEnd
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;; Paste Student Info into Shipping Form ;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; Ask user to navigate to the UPS shipping page
-$iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Navigate to the UPS shipping page and Log in" & @LF & "Click Yes to continue the script")
-
-; If no (7), then terminate execution
-If $iAnswer = 7 Then
-	Exit
- EndIf
-
-
-; Loop Variables
-$iRowNum = 0
-$i = 0
-$j = 0
-
-; Iterating through each student
-While $iRowNum < $rowNumber
-
-   ; Click Shipping
-   MouseClick("left", 465, 165, 1)
-
-   ; Click Create a Shipment
-   MouseClick("left", 285, 311, 1)
+   WinActivate($hWndWebpage, "")
 
    Sleep($delay * 20)
 
-   ; Click Enter New Address
-   MouseClick("left", 295, 595, 1)
+   ; Click Student Name Column
+   MouseClick("left", 620, 440, 1)
 
-   ; Click Company or Name
-   MouseClick("left", 370, 695, 1)
+   Sleep($delay * 10)
 
-   ; Enter student name
-   Send($aWords[$j][0] & " " & $aWords[$j][1], 1)
+   ; Go to the bottom of the column
+   Send("^{DOWN}")
+   Sleep($delay * 10)
+   Send("{DOWN}")
 
-   Call("sendTabs", 3)
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;; Paste Student Info to Spreadsheet ;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-   ; Enter Address
-   Send($aWords[$j][4], 1)
-   Call("sendTabs", 3)
+   ; Loop Variables
+   $iRowNum = 0
+   $i = 0
+   $j = 0
 
-   ; Enter City
-   Send($aWords[$j][5], 1)
-   Call("sendTabs", 2)
+   While $iRowNum < $rowNumber
 
-   ; Enter Zip
-   Send($aWords[$j][6], 1)
-   Send("{TAB}")
+	  ; Enter student name
+	  Send($aWords[$j][$i] & " " & $aWords[$j][$i + 1], 1)
+	  $i = $i + 2
 
-   ; Enter phone
-   Send($aWords[$j][8], 1)
-   Call("sendTabs", 2)
+	  Send("{RIGHT}")
 
-   ; Enter Email
-   Send($aWords[$j][7], 1)
-   Call("sendTabs", 2)
-   Send("{SPACE}")
+	  ; Enter student Number
+	  Send($aWords[$j][$i], 1)
+	  $i = $i + 1
 
-   ; Navigate to Weight
-   Call("sendTabs", 10)
+	  Send("{RIGHT}")
 
-   ; Weight
-   Send("3")
-   Call("sendTabs", 1)
+	  ; Enter Campus
+	  Send("Van")
 
-   ; Dimensions
-   Send("16")
-   Send("{TAB}")
+	  Send("{RIGHT}")
 
-   Send("9")
-   Send("{TAB}")
+	  ; Enter expected start date
+	  Send($aWords[$j][$i], 1)
+	  $i = $i + 1
 
-   Send("3")
-   Call("sendTabs", 3)
+	  Send("{RIGHT}")
 
-   ; Value
-   Send("250")
+	  ; Enter in the shipping date
+	  Send(_NowDate(), 1)
 
-   ; Navigate to Other Reference
-   Call("sendTabs", 16)
+	  ; Go to next empty row
+	  Send("{DOWN}")
+	  Send("{LEFT}")
+	  Send("{LEFT}")
+	  Send("{LEFT}")
+	  Send("{LEFT}")
 
-   ; Value
-   Send("Student Tablet")
+	  $i = 0
+	  $j = $j + 1
+	  $iRowNum = $iRowNum + 1
+   WEnd
 
-   $j = $j + 1
-   $iRowNum = $iRowNum + 1
+   shipping()
+EndFunc
+
+Func shipping()
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;; Paste Student Info into Shipping Form ;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
    ; Ask user to navigate to the UPS shipping page
-$iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Ensure to put in the state and verify info" & @LF & "Continue the script after the current student is finished" & @LF & "Click Yes to continue the script")
+   $iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Navigate to the UPS shipping page and Log in" & @LF & "Click Yes to continue the script")
 
-; If no (7), then terminate execution
-If $iAnswer = 7 Then
-	Exit
- EndIf
+   ; If no (7), then terminate execution
+   If $iAnswer = 7 Then
+	   Exit
+	EndIf
 
-WEnd
+
+   ; Loop Variables
+   $iRowNum = 0
+   $i = 0
+   $j = 0
+
+   ; Iterating through each student
+   While $iRowNum < $rowNumber
+
+	  ; Click Shipping
+	  MouseClick("left", 465, 165, 1)
+
+	  ; Click Create a Shipment
+	  MouseClick("left", 285, 311, 1)
+
+	  Sleep($delay * 20)
+
+	  ; Click Enter New Address
+	  MouseClick("left", 295, 595, 1)
+
+	  ; Click Company or Name
+	  MouseClick("left", 370, 695, 1)
+
+	  ; Enter student name
+	  Send($aWords[$j][0] & " " & $aWords[$j][1], 1)
+
+	  Call("sendTabs", 3)
+
+	  ; Enter Address
+	  Send($aWords[$j][4], 1)
+	  Call("sendTabs", 3)
+
+	  ; Enter City
+	  Send($aWords[$j][5], 1)
+	  Call("sendTabs", 2)
+
+	  ; Enter Zip
+	  Send($aWords[$j][6], 1)
+	  Send("{TAB}")
+
+	  ; Enter phone
+	  Send($aWords[$j][8], 1)
+	  Call("sendTabs", 2)
+
+	  ; Enter Email
+	  Send($aWords[$j][7], 1)
+	  Call("sendTabs", 2)
+	  Send("{SPACE}")
+
+	  ; Navigate to Weight
+	  Call("sendTabs", 10)
+
+	  ; Weight
+	  Send("3")
+	  Call("sendTabs", 1)
+
+	  ; Dimensions
+	  Send("16")
+	  Send("{TAB}")
+
+	  Send("9")
+	  Send("{TAB}")
+
+	  Send("3")
+	  Call("sendTabs", 3)
+
+	  ; Value
+	  Send("250")
+
+	  ; Navigate to Other Reference
+	  Call("sendTabs", 16)
+
+	  ; Value
+	  Send("Student Tablet")
+
+	  $j = $j + 1
+	  $iRowNum = $iRowNum + 1
+
+	  ; Ask user to navigate to the UPS shipping page
+   $iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Ensure to put in the state and verify info" & @LF & "Continue the script after the current student is finished" & @LF & "Click Yes to continue the script")
+
+   ; If no (7), then terminate execution
+   If $iAnswer = 7 Then
+	   Exit
+	EndIf
+
+   WEnd
+
+EndFunc
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; Functions ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -410,5 +425,64 @@ EndFunc
 
 ; Function to terminate script with ESC being the hotkey
 Func Terminate()
+   GUICreate("Menu") ; will create a dialog box that when displayed is centered
+
+   GUISetBkColor(0x00E0FFFF)
+   GUISetFont(9, 300)
+
+   GUICtrlCreateTab(10, 10, 480, 480)
+		; Create tabitems
+
+		Local $test = "blah"
+
+        GUICtrlCreateTabItem("Control")
+        Local $id1 = GUICtrlCreateButton("Beginning", 10, 40, 120, 20)
+        Local $id2 = GUICtrlCreateButton("Spreadsheet", 10, 70, 120, 20)
+		Local $id3 = GUICtrlCreateButton("Shipping", 10, 100, 120, 20)
+
+		GUICtrlCreateTabItem("Student Info")
+		 ; Loop Variables
+		 Local $iRN = 0
+		 Local $it = 0
+		 Local $jit = 0
+
+		 ; Iterating through each student
+		 While $iRN < $rowNumber
+			$it = 0
+			While $it < 9
+			   GUICtrlCreateInput($aWords[$jit][$it], 10, 50, 300, 300)
+			   $it = $it + 1
+			WEnd
+
+			$jit = $jit + 1
+			$iRN = $iRN + 1
+		 WEnd
+
+
+		 ; Close Tab definiton
+		 GUICtrlCreateTabItem("")
+
+        GUICtrlSetState($id1, $GUI_CHECKED)
+
+        GUISetState(@SW_SHOW)
+
+        Local $idMsg
+        ; Loop until the user exits.
+        While 1
+                $idMsg = GUIGetMsg()
+                Select
+                        Case $idMsg = $GUI_EVENT_CLOSE
+                                ExitLoop
+                        Case $idMsg = $id1
+                                start()
+								ExitLoop
+                        Case $idMsg = $id2
+                                spreadsheet()
+								ExitLoop
+						Case $idMsg = $id3
+                                shipping()
+								ExitLoop
+                EndSelect
+        WEnd
     Exit
 EndFunc   ;==>Terminate
