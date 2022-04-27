@@ -30,10 +30,10 @@ $delay = 125 ; delay used to control the speed of clicking, copy/paste, etc.
 $color1 = 0x000000 ; color of the text in Contact Manager (black)
 $color2 = 0xFFFFFF ; color of the text in Contact Manager (white)
 
-$rowStart = 1
+$rowStart = 5
 $rowNumber = 1
 
-Local $aWords[20][9]
+Local $aWords[20][11]
 
 ; Ask user if they would like to run the script.
 Local $iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Please read the associated user guide before using this script" & @LF & "To terminate the script during execution press the ESC key" & @LF & "Would you like to proceed?")
@@ -160,21 +160,63 @@ Func start()
 	  Sleep($delay * 5)
 
 	  $aWords[$j][$i] = ClipGet()
-	  EndIf
+   EndIf
+   $i = $i + 1
 
 	  ; Display the data returned by ClipGet.
 		  ;MsgBox($MB_SYSTEMMODAL, "", "The following data is stored in the clipboard: " & @CRLF & $aWords[$j][4] & " " & $aWords[$j][5] & " " & $aWords[$j][6] & " " & $aWords[$j][7]  & " " & $aWords[$j][8])
 
-	  $i = 0
-	  $j = $j + 1
-	  $iRowNum = $iRowNum + 1
-	  $curRow = $curRow + 1
 
 	  ; Click Cancel Button
 	  MouseClick("left", 1200, 785, 1)
 
 	  ; Click Close Button
 	  MouseClick("left", 1265, 785, 1)
+
+	  Sleep($delay * 5)
+
+	  ; Click Contact Method
+	  MouseClick("left", 15, 285, 1)
+
+	  Sleep($delay * 5)
+
+	  ; Copy State - double click
+	  MouseClick("left", 995, 395, 1)
+	  Call("sInfo", 995, 395, $j, $i)
+	  $i = $i + 1
+
+	  Sleep($delay * 5)
+
+	  ; Click Close
+	  MouseClick("left", 1170, 780, 1)
+
+	  Sleep($delay * 5)
+
+	  ; Click Edit Activity
+	  MouseClick("left", 520, 850, 1)
+
+	  Sleep($delay * 10)
+
+	  ; Copy Program - double click
+	  MouseClick("left", 830, 710, 1)
+	  Call("sInfo", 830, 710, $j, $i)
+
+	  Sleep($delay * 5)
+
+	  ; Click Close
+	  MouseClick("left", 1170, 870, 1)
+
+	  Sleep($delay * 5)
+
+	  ; Click No
+	  MouseClick("left", 1020, 620, 1)
+
+	  Sleep($delay * 5)
+
+	  $i = 0
+	  $j = $j + 1
+	  $iRowNum = $iRowNum + 1
+	  $curRow = $curRow + 1
    WEnd
 
    spreadsheet()
@@ -278,8 +320,14 @@ Func spreadsheet()
 	  ; Enter in the shipping date
 	  Send(_NowDate(), 1)
 
+	  Send("{RIGHT}")
+
+	  ; Enter Program
+	  Send($aWords[$j][$i + 6], 1)
+
 	  ; Go to next empty row
 	  Send("{DOWN}")
+	  Send("{LEFT}")
 	  Send("{LEFT}")
 	  Send("{LEFT}")
 	  Send("{LEFT}")
@@ -340,7 +388,11 @@ Func shipping()
 
 	  ; Enter City
 	  Send($aWords[$j][5], 1)
-	  Call("sendTabs", 2)
+	  Call("sendTabs", 1)
+
+	  ; Enter State
+	  Call("state", $aWords[$j][9])
+	  Call("sendTabs", 1)
 
 	  ; Enter Zip
 	  Send($aWords[$j][6], 1)
@@ -405,6 +457,16 @@ Func sendTabs($num)
    Local $itr = 0;
    While $itr < $num
 	  Send("{TAB}")
+	  $itr = $itr + 1
+	  Sleep($delay)
+   WEnd
+EndFunc
+
+; Click TAB $num of times
+Func sendDown($num)
+   Local $itr = 0;
+   While $itr < $num
+	  Send("{DOWN}")
 	  $itr = $itr + 1
 	  Sleep($delay)
    WEnd
@@ -525,4 +587,159 @@ Func Terminate()
 			 EndIf
         WEnd
     Exit
-EndFunc   ;==>Terminate
+ EndFunc   ;==>Terminate
+
+ Func state($state)
+	Switch $state
+	  Case "AL"
+		 Send("A")
+	  Case "AK"
+		 Send("A")
+		 Call("sendDown", 1)
+	  Case "AZ"
+		 Send("A")
+		 Call("sendDown", 2)
+	  Case "AR"
+		 Send("A")
+		 Call("sendDown", 3)
+
+	  Case "CA"
+		 Send("C")
+	  Case "CO"
+		 Send("C")
+		 Call("sendDown", 1)
+	  Case "CT"
+		 Send("C")
+		 Call("sendDown", 2)
+
+	  Case "DE"
+		 Send("D")
+	  Case "DC"
+		 Send("D")
+		 Call("sendDown", 1)
+
+	  Case "GA"
+		 Send("G")
+
+	  Case "HI"
+		 Send("H")
+
+	  Case "ID"
+		 Send("I")
+	  Case "IL"
+		 Send("I")
+		 Call("sendDown", 1)
+	  Case "IN"
+		 Send("I")
+		 Call("sendDown", 2)
+	  Case "IA"
+		 Send("I")
+		 Call("sendDown", 3)
+
+	  Case "KS"
+		 Send("K")
+	  Case "KY"
+		 Send("K")
+		 Call("sendDown", 1)
+
+	  Case "LA"
+		 Send("L")
+
+	  Case "ME"
+		 Send("M")
+	  Case "MD"
+		 Send("M")
+		 Call("sendDown", 1)
+	  Case "MA"
+		 Send("M")
+		 Call("sendDown", 2)
+	  Case "MI"
+		 Send("M")
+		 Call("sendDown", 3)
+	  Case "MN"
+		 Send("M")
+		 Call("sendDown", 4)
+	  Case "MS"
+		 Send("M")
+		 Call("sendDown", 5)
+	  Case "MO"
+		 Send("M")
+		 Call("sendDown", 6)
+	  Case "MT"
+		 Send("M")
+		 Call("sendDown", 7)
+
+	  Case "NE"
+		 Send("N")
+	  Case "NV"
+		 Send("N")
+		 Call("sendDown", 1)
+	  Case "NH"
+		 Send("N")
+		 Call("sendDown", 2)
+	  Case "NJ"
+		 Send("N")
+		 Call("sendDown", 3)
+	  Case "NM"
+		 Send("N")
+		 Call("sendDown", 4)
+	  Case "NY"
+		 Send("N")
+		 Call("sendDown", 5)
+	  Case "NC"
+		 Send("N")
+		 Call("sendDown", 6)
+	  Case "ND"
+		 Send("N")
+		 Call("sendDown", 7)
+
+	  Case "OH"
+		 Send("O")
+	  Case "OK"
+		 Send("O")
+		 Call("sendDown", 1)
+	  Case "OR"
+		 Send("O")
+		 Call("sendDown", 2)
+
+	  Case "PA"
+		 Send("P")
+
+	  Case "RI"
+		 Send("R")
+
+	  Case "SC"
+		 Send("S")
+	  Case "SD"
+		 Send("S")
+		 Call("sendDown", 1)
+
+	  Case "TN"
+		 Send("T")
+	  Case "TX"
+		 Send("T")
+		 Call("sendDown", 1)
+
+	  Case "UT"
+		 Send("U")
+
+	  Case "VT"
+		 Send("V")
+	  Case "VA"
+		 Send("V")
+		 Call("sendDown", 1)
+
+	  Case "WA"
+		 Send("W")
+	  Case "WV"
+		 Send("W")
+		 Call("sendDown", 1)
+	  Case "WI"
+		 Send("W")
+		 Call("sendDown", 2)
+	  Case "WY"
+		 Send("W")
+		 Call("sendDown", 3)
+	  EndSwitch
+
+ EndFunc
