@@ -1,4 +1,4 @@
-﻿param([switch]$Elevated)
+param([switch]$Elevated)
 
 function Test-Admin{
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -14,6 +14,9 @@ if ((Test-Admin) -eq $false) {
     exit
 }
 
+$Printer = Read-Host "Enter printer name: "
+$FirstPrintJob = -1
+
 try
 {
     while ($true)
@@ -28,11 +31,17 @@ try
             Start-Service -InputObject $s -PassThru
         }
 
-        $Printer = Get-Printer -Name "HP LaserJet Professional M1212nf MFP"
-        $PrintJobsById = Get-PrintJob -PrinterObject $Printer | select -ExpandProperty "Id"
-        write-host $PrintJobsById.Length
+        $PrinterJobs = Get-Printer -Name $Printer
+        $PrintJobsById = Get-PrintJob -PrinterObject $PrinterJobs | select -ExpandProperty "Id"
 
-        Start-Sleep -Seconds 600
+        if ($PrintJobsById[0] -eq $FirstPrintJob)
+        {
+            Restart-Service -InputObject $s -PassThru
+        }
+
+        $FirstPrintJob = $PrintJobsById[0]
+
+        Start-Sleep -Seconds 900
     }
 }
 finally
