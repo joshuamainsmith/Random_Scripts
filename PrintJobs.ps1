@@ -19,79 +19,103 @@ $ErrorLogs = "C:\PrintLogs\"
 $LogFile = "C:\PrintLogs\"
 
 #$PrinterName = Read-Host "Enter printer name: "
-New-CimSession -ComputerName psc-app-01,yak-app-01,wen-app-01,fif-app-01,van-app-01,lac-app-01,lnc-app-01,cyn-app-01,oxr-app-01,fmn-app-01,mso-app-01,bil-app-01,anc-app-01,was-app-01
-$Servers = "psc-app-01","yak-app-01","wen-app-01","fif-app-01","van-app-01","lac-app-01","lnc-app-01","cyn-app-01","oxr-app-01",
-    "fmn-app-01","mso-app-01","bil-app-01","was-app-01","anc-app-01","anc-app-01","anc-app-01","anc-app-01"
-$PrinterName = "psc-copy","yak-adm","wen-copy","fif-adm","van-adm","lac-adm","lnc-admn","cyn-admn","oxr-copy",
-    "fmn-copy-01","MSO-ADM-KM454","BIL-ADM-KM454","WAS-KM458E","anc-adms","ANC-ANX","ANC-EDU","ANC-EP"
+New-CimSession -ComputerName psc-app-01,yak-app-01,wen-app-01,fif-app-01,van-app-01,lac-app-01,lnc-app-01,cyn-app-01,oxr-app-01,
+    fmn-app-01,mso-app-01,bil-app-01,anc-app-01,was-app-01,rno-app-01
+
+$Servers = ("psc-app-01", "psc-copy"),
+    ("yak-app-01", "yak-adm"),
+    ("wen-app-01", "wen-copy"),
+    ("fif-app-01","fif-adm"),
+    ("van-app-01","van-adm"),
+    ("lac-app-01","lac-adm"),
+    ("lnc-app-01","lnc-admn"),
+    ("cyn-app-01","cyn-admn"),
+    ("oxr-app-01","oxr-copy"),
+    ("fmn-app-01","fmn-copy-01"),
+    ("mso-app-01","MSO-ADM-KM454"),
+    ("bil-app-01","BIL-ADM-KM454"),
+    ("was-app-01","WAS-KM458E"),
+    ("anc-app-01","anc-adms","ANC-ANX","ANC-EDU","ANC-EP"),
+    ("rno-app-01","RNO-REG","RNO-FA","RNO-ACCT")
+
 $FirstPrintJob = -1
 $PrintJobsById = -1
 $RemoveFirstJob = $false
 $Count = 0
+$CurrentServer = ""
 
 try
 {
+
     while ($true)
-    {
-        if ($Count % $PrinterName.Length -eq 0)
+    {        
+
+        foreach ($Server in $Servers)
         {
-            $Count = 0
-        }
+            Write-Host "Checking $($Server[0]) - $(Get-Date)"
+            $CurrentServer = $Server[0]
 
-        Write-Host "Checking $($Servers[$Count]) - $(Get-Date)"        
-
-        $s = Get-Service Spooler -ComputerName $Servers[$Count]
-        if ($s.Status -eq "Stopped")
-        {
-            'Spooler Stopped'
-            $LogFile = "$($ErrorLogs)$($Servers[$Count])\PrintSpoolerLog_$($PrinterName[$Count]).txt"
-            '========================================== Log Start ==========================================' >> $LogFile
-
-            Get-Date >> $LogFile
-            $Servers[$Count] >> $LogFile
-            Start-Service -InputObject $s -PassThru | Format-List >> $LogFile
-            '' >> $LogFile
-        }
-
-        $Printer = Get-Printer -CimSession $Servers[$Count] -Name $PrinterName[$Count]
-
-        $PrintJobsById = Get-PrintJob -PrinterObject $Printer | select -ExpandProperty "Id"
-
-        if ($PrintJobsById)
-        {
-            if ($PrintJobsById[0] -eq $FirstPrintJob)
+            $s = Get-Service Spooler -ComputerName $Server[0]
+            if ($s.Status -eq "Stopped")
             {
-                'Print Jobs Stuck'
-                $LogFile = "$($ErrorLogs)$($Servers[$Count])\PrintJobLog_$($PrinterName[$Count]).txt"
+                'Spooler Stopped'
+                $LogFile = "$($ErrorLogs)$($Server[0])\PrintSpoolerLog.txt"
                 '========================================== Log Start ==========================================' >> $LogFile
-                Get-Date >> $LogFile
-                $Printer >> $LogFile
-                '' >> $LogFile
-                '########## Print Job ID ##########' >> $LogFile
-                $PrintJobsById >> $LogFile
-                if ($RemoveFirstJob)
-                {
-                    Remove-PrintJob -PrinterObject $Printer -ID $PrintJobsById[0]
-                }
-                Restart-Service -InputObject $s -PassThru | Format-List >> $LogFile               
-                '' >> $LogFile
-                $RemoveFirstJob = $true
-            }
-            else
-            {
-                $RemoveFirstJob = $false
-                $FirstPrintJob = $PrintJobsById[0]
-            }            
-        }        
 
-        Start-Sleep -Seconds 53
-        $Count++
+                Get-Date >> $LogFile
+                $Server[0] >> $LogFile
+                Start-Service -InputObject $s -PassThru | Format-List >> $LogFile
+                '' >> $LogFile
+            }            
+
+            foreach ($Printer in $Server)
+            {
+                if ($Printer -notlike "*app-01")
+                {
+                    $PrinterObj = Get-Printer -CimSession $Server[0] -Name $Printer
+
+                    $PrintJobsById = Get-PrintJob -PrinterObject $PrinterObj | select -ExpandProperty "Id"
+
+                    write-host "Checking $($Printer)"
+
+                    if ($PrintJobsById)
+                    {
+                        if ($PrintJobsById[0] -eq $FirstPrintJob)
+                        {
+                            'Print Jobs Stuck'
+                            $LogFile = "$($ErrorLogs)$($Server[0])\PrintJobLog_$($Printer).txt"
+                            '========================================== Log Start ==========================================' >> $LogFile
+                            Get-Date >> $LogFile
+                            $Printer >> $LogFile
+                            $PrinterObj >> $LogFile
+                            '' >> $LogFile
+                            '########## Print Job ID ##########' >> $LogFile
+                            $PrintJobsById >> $LogFile
+                            if ($RemoveFirstJob)
+                            {
+                                Remove-PrintJob -PrinterObject $PrinterObj -ID $PrintJobsById[0]
+                            }
+                            Restart-Service -InputObject $s -PassThru | Format-List >> $LogFile               
+                            '' >> $LogFile
+                            $RemoveFirstJob = $true
+                        }
+                        else
+                        {
+                            $RemoveFirstJob = $false
+                            $FirstPrintJob = $PrintJobsById[0]
+                        }            
+                    } 
+                }               
+            }
+            Start-Sleep -Seconds 45
+            $Count++
+        }
     }
 }
 finally
 {
     write-host "Script Stopped"
-    $LogFile = "$($ErrorLogs)$($Servers[$Count])\PrintScriptStoppedLog_$($PrinterName[$Count]).txt"
+    $LogFile = "$($ErrorLogs)$($CurrentServer)\PrintScriptStoppedLog.txt"
 
     '========================================== Log Start ==========================================' >> $LogFile
 
