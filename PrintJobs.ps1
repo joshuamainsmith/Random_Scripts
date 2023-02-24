@@ -38,7 +38,7 @@ $Servers = ("psc-app-01", "psc-copy"),
     ("anc-app-01","anc-adms","ANC-ANX","ANC-EDU","ANC-EP"),
     ("rno-app-01","RNO-REG","RNO-FA","RNO-ACCT")
 
-$FirstPrintJob = -1
+$FirstPrintJob = New-Object 'object[]' 20
 $PrintJobsById = -1
 $RemoveFirstJob = $false
 $Count = 0
@@ -58,12 +58,14 @@ try
             $s = Get-Service Spooler -ComputerName $Server[0]
             if ($s.Status -eq "Stopped")
             {
+                ''
                 'Spooler Stopped'
+                ''
                 $LogFile = "$($ErrorLogs)$($Server[0])\PrintSpoolerLog.txt"
                 '========================================== Log Start ==========================================' >> $LogFile
 
                 Get-Date >> $LogFile
-                $Server[0] >> $LogFile
+                "Server: $($Server[0])" >> $LogFile
                 Start-Service -InputObject $s -PassThru | Format-List >> $LogFile
                 '' >> $LogFile
             }            
@@ -73,28 +75,31 @@ try
                 if ($Printer -notlike "*app-01")
                 {
                     $PrinterObj = Get-Printer -CimSession $Server[0] -Name $Printer
-
-                    $PrintJobsById = Get-PrintJob -PrinterObject $PrinterObj | select -ExpandProperty "Id"
+                    $PrintJobs = Get-PrintJob -PrinterObject $PrinterObj
+                    $PrintJobsById = $PrintJobs | select -ExpandProperty "Id"
 
                     write-host "Checking $($Printer)"
 
                     if ($PrintJobsById)
                     {
-                        if ($PrintJobsById[0] -eq $FirstPrintJob)
+                        if ($PrintJobsById[0] -eq $FirstPrintJob[$Count])
                         {
+                            ''
                             'Print Jobs Stuck'
+                            ''
+
                             $LogFile = "$($ErrorLogs)$($Server[0])\PrintJobLog_$($Printer).txt"
                             '========================================== Log Start ==========================================' >> $LogFile
+
                             Get-Date >> $LogFile
-                            $Printer >> $LogFile
-                            $PrinterObj >> $LogFile
-                            '' >> $LogFile
-                            '########## Print Job ID ##########' >> $LogFile
-                            $PrintJobsById >> $LogFile
+                            $PrinterObj | Format-List >> $LogFile
+                            $PrintJobs | Format-List >> $LogFile
+
                             if ($RemoveFirstJob)
                             {
                                 Remove-PrintJob -PrinterObject $PrinterObj -ID $PrintJobsById[0]
                             }
+
                             Restart-Service -InputObject $s -PassThru | Format-List >> $LogFile               
                             '' >> $LogFile
                             $RemoveFirstJob = $true
@@ -102,13 +107,14 @@ try
                         else
                         {
                             $RemoveFirstJob = $false
-                            $FirstPrintJob = $PrintJobsById[0]
+                            $FirstPrintJob[$Count] = $PrintJobsById[0]
                         }            
-                    } 
-                }               
+                    }
+                    Start-Sleep -Seconds 45
+                    $Count++ 
+                }            
             }
-            Start-Sleep -Seconds 45
-            $Count++
+            $Count = 0          
         }
     }
 }
@@ -124,7 +130,7 @@ finally
     if ($Printer)
     {
         '########## Printer ##########' >> $LogFile
-        $Printer >> $LogFile
+        $Printer | Format-List >> $LogFile
     }
 
     if ($Error)
@@ -134,7 +140,7 @@ finally
     }
 
     '########## Server ##########' >> $LogFile
-    $Servers[$Count] >> $LogFile
+    $CurrentServer >> $LogFile
 
     '' >> $LogFile
 }
