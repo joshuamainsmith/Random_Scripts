@@ -19,20 +19,27 @@ HotKeySet("{ESC}", "Terminate")
 ; aWords[student][6] - zip
 ; aWords[student][7] - email
 ; aWords[student][8] - phone
+; aWords[student][10] - program
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; Globals ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-$delay = 125 ; delay used to control the speed of clicking, copy/paste, etc.
+$delay = 100 ; delay used to control the speed of clicking, copy/paste, etc.
+
+Local $bNumkey = False
 
 ; Might need these for shipping portion (future)
-$color1 = 0x000000 ; color of the text in Contact Manager (black)
-$color2 = 0xFFFFFF ; color of the text in Contact Manager (white)
+$color1 = 0x000000 ; color of the editable text in Student Master (black)
+$color2 = 0xFFFFFF ; color of the background text in Student Master (white)
+$color3 = 0x6D6D6D ; color of the greyed out text in Student Master (grey)
+$color4 = 0xBFFFCF ; color of the light green text in Student Master (green)
+$colorBlue = 0x409EFE ; color of the light blue text in Contact Method (Blue)
 
-$rowStart = 5
+$rowStart = 4
 $rowNumber = 1
 
+; $aWords[NumStudents][NumFields]
 Local $aWords[20][11]
 
 ; Ask user if they would like to run the script.
@@ -92,18 +99,39 @@ Func start()
    Local $curRow = $rowStart
 
    While $iRowNum < $rowNumber
+	  ; Click Contact Manager
+	  MouseClick("left", 58, 76, 1)
+	  Sleep($delay * 5)
+
 	  ; Click Start Row
 	  MouseClick("left", 470, 390 + $curRow * 15, 1)
+	  Sleep($delay * 5)
 
 	  ; Click Student Folder
 	  MouseClick("left", 15, 100, 1)
+	  Sleep($delay * 5)
 
 	  Sleep($delay)
 
+	  ; Wait for Student Master
+	  PixelSearch(951, 637, 985, 646, $color4)
+	  While @error
+		 Sleep(20)
+		 PixelSearch(951, 637, 985, 646, $color4)
+	  WEnd
+
 	  ; Click Edit
 	  MouseClick("left", 1080, 785, 1)
+	  Sleep($delay * 5)
 
-	  Sleep($delay * 10)
+	  ;Sleep($delay * 10)
+
+	  ; Wait for Student Master
+	  PixelSearch(777, 597, 900, 604, $color1)
+	  While @error
+		 Sleep(20)
+		 PixelSearch(777, 597, 900, 604, $color1)
+	  WEnd
 
 	  ; Copy First Name
 	  Call("sInfo", 1050, 380, $j, $i)
@@ -144,24 +172,24 @@ Func start()
 	  If Not @error Then
 		 MouseClickDrag($MOUSE_CLICK_LEFT, 870, 580, 770, 580)
 
-	  ; Copy selected text
-	  Send("^c")
+		 ; Copy selected text
+		 Send("^c")
 
-	  Sleep($delay * 5)
+		 Sleep($delay * 5)
 
-	  $aWords[$j][$i] = ClipGet()
+		 $aWords[$j][$i] = ClipGet()
 
-		 Else
+	  Else
 		 MouseClickDrag($MOUSE_CLICK_LEFT, 870, 515, 770, 515)
 
-	  ; Copy selected text
-	  Send("^c")
+		 ; Copy selected text
+		 Send("^c")
 
-	  Sleep($delay * 5)
+		 Sleep($delay * 5)
 
-	  $aWords[$j][$i] = ClipGet()
-   EndIf
-   $i = $i + 1
+		 $aWords[$j][$i] = ClipGet()
+	  EndIf
+	  $i = $i + 1
 
 	  ; Display the data returned by ClipGet.
 		  ;MsgBox($MB_SYSTEMMODAL, "", "The following data is stored in the clipboard: " & @CRLF & $aWords[$j][4] & " " & $aWords[$j][5] & " " & $aWords[$j][6] & " " & $aWords[$j][7]  & " " & $aWords[$j][8])
@@ -180,6 +208,30 @@ Func start()
 
 	  Sleep($delay * 5)
 
+	  ; Wait for Contact Method to load - Window
+	  ;PixelSearch(1147, 778, 1193, 786, $color1)
+	  ;Sleep( $delay )
+	  ;While @error
+		 ;Sleep(20)
+		; PixelSearch(1147, 778, 1193, 786, $color1)
+	  ;WEnd
+
+	  ; Wait for Contact Method to load - Window
+	  PixelSearch(840, 284, 993, 298, $colorBlue)
+	  ;Sleep( $delay )
+	  While @error
+		 Sleep(20)
+		 PixelSearch(840, 284, 993, 298, $colorBlue)
+	  WEnd
+
+	  ; Wait for Contact Method to load - Cell
+	  PixelSearch(811, 501, 892, 604, $color1)
+	  ;Sleep( $delay )
+	  While @error
+		 Sleep(20)
+		 PixelSearch(811, 501, 892, 604, $color1)
+	  WEnd
+
 	  ; Copy State - double click
 	  MouseClick("left", 995, 395, 1)
 	  Call("sInfo", 995, 395, $j, $i)
@@ -192,26 +244,94 @@ Func start()
 
 	  Sleep($delay * 5)
 
-	  ; Click Edit Activity
-	  MouseClick("left", 520, 850, 1)
+	  ; Click Academic Records
+	  MouseClick("left", 62, 992, 1)
+	  Sleep($delay * 5)
+
+	  ; Click Enrollment
+	  MouseClick("left", 18, 192, 1)
+	  Sleep($delay * 5)
+
+	  ; Wait for Enrollment to enable - Window Loads
+	  PixelSearch(1050, 825, 1060, 835, $color1)
+	  While Not @error
+		 Sleep(20)
+		 PixelSearch(1050, 825, 1060, 835, $color1)
+	  WEnd
+
+	  ; Wait for Enrollment to enable - Cell Loads
+	  PixelSearch(795, 513, 843, 519, $color3)
+	  While Not @error
+		 Sleep(20)
+		 PixelSearch(1050, 825, 1060, 835, $color3)
+	  WEnd
+
+	  ; Click Enrollment Information
+	  MouseClick("left", 865, 482, 1)
+	  Sleep($delay * 5)
+
+	  ; Wait for Enrollment Info tab to enable - Academic Advisor bottom left
+	  PixelSearch(912, 704, 979, 712, $color4)
+	  While @error
+		 Sleep(20)
+		 PixelSearch(912, 704, 979, 712, $color4)
+	  WEnd
+
+	  ; Click Edit
+	  MouseClick("left", 943, 449, 1)
 
 	  Sleep($delay * 10)
 
-	  ; Copy Program - double click
-	  MouseClick("left", 830, 710, 1)
-	  Call("sInfo", 830, 710, $j, $i)
+	  PixelSearch(804, 535, 847, 545, $color3)
+	  While Not @error
+		 Sleep(20)
+		 PixelSearch(804, 535, 847, 545, $color3)
+	  WEnd
 
+	  ; Double Click Program and save
+	  MouseClick("left", 896, 542, 1)
+	  Call("sInfo", 896, 542, $j, $i)
+	  Sleep($delay * 5)
+
+	  ; Click Cancel
+	  MouseClick("left", 1188, 834, 1)
 	  Sleep($delay * 5)
 
 	  ; Click Close
-	  MouseClick("left", 1170, 870, 1)
-
+	  MouseClick("left", 1261, 835, 1)
 	  Sleep($delay * 5)
+
+	  ; Click Edit Activity
+	  ;MouseClick("left", 520, 850, 1)
+
+	  ;Sleep($delay * 10)
+
+	  ;PixelSearch(780, 710, 840, 711, $color1)
+
+	 ; If Not @error Then
+		 ; Copy Program - double click
+		; MouseClick("left", 835, 710, 1)
+		; Call("sInfo", 835, 710, $j, $i)
+
+		; Else
+
+		 ; Copy Program - double click
+		; MouseClick("left", 835, 725, 1)
+		; Call("sInfo", 835, 725, $j, $i)
+
+	;  EndIf
+
+	  ;Sleep($delay * 5)
+
+	  ; Click Close
+	  ;MouseClick("left", 1170, 870, 1)
+
+	  ;Sleep($delay * 5)
 
 	  ; Click No
-	  MouseClick("left", 1020, 620, 1)
+	 ; MouseClick("left", 1020, 620, 1)
 
-	  Sleep($delay * 5)
+	  ;Sleep($delay * 5)
 
 	  $i = 0
 	  $j = $j + 1
@@ -230,18 +350,21 @@ Func spreadsheet()
    ; Minimize CNS
 	  ;MouseClick("left", 1765, 10, 1)
 
-   Sleep($delay * 10)
+   Sleep($delay * 5)
 
-   Local $aList = _WinAPI_EnumWindowsTop ( )
+   ;Local $aList = _WinAPI_EnumWindowsTop ( )
 
-   For $i = 1 To $aList[0][0]
-	   If $aList[$i][1] = "MozillaWindowClass" Then
-		   WinActivate($aList[$i][0])
-	   EndIf
-   Next
+   ;For $i = 1 To $aList[0][0]
+	  ;If $aList[$i][1] = "MozillaWindowClass" Then
+	 ; ; If $aList[$i][1] = "Chrome_WidgetWin_1" Then
+	;	   WinActivate($aList[$i][0])
+	;   EndIf
+  ; Next
 
    ; Get the handle of the Browser window via Class
-   Local $hWndBrowser = WinGetHandle("[CLASS:MozillaWindowClass]")
+   ; Local $hWndBrowser = WinGetHandle("[CLASS:MozillaWindowClass]")
+   Local $hWndBrowser = WinGetHandle("[CLASS:XLMAIN]")
+   ;Local $hWndBrowser = WinGetHandle("[CLASS:Chrome_WidgetWin_1]")
 
    ; Display an error message if there was a problem in getting the window handle (make sure browser is open)
    If @error Then
@@ -252,33 +375,55 @@ Func spreadsheet()
    ; Bring Browser to the foreground
    WinActivate($hWndBrowser, "")
 
-   Sleep($delay * 10)
+   Sleep($delay * 5)
 
    ;;; Check to see if browser is open on spreadsheet
    ; Get the handle of the Browser window via Class
-   $hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Mozilla Firefox")
+   ;
+   ;$hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Mozilla Firefox")
+   ;
+   ;$hWndWebpage = WinGetHandle("2023 Student Computer Tracking.xlsx — Mozilla Firefox")
+   ;
+   $hWndWebpage = WinGetHandle("2023 Student Computer Tracking.xlsx - Excel")
+   ;
+   ;$hWndWebpage = WinGetHandle("Student Computer Tracking.xlsx — Google Chrome")
 
    ; Display an error message if there was a problem in getting the window handle (make sure webpage is open)
    If @error Then
-		   Send("^t")
-		   Sleep($delay * 5)
-		   ClipPut("https://prospectedu-my.sharepoint.com/:x:/r/personal/william_christensen_prospecteducation_com/_layouts/15/Doc.aspx?sourcedoc=%7BAE32C238-0CF9-4E31-A2AF-75570AF50491%7D&file=Student%20Computer%20Tracking.xlsx")
-		   Sleep($delay)
-		   Send("^v")
-		   Sleep($delay * 5)
-		   Send("{ENTER}")
+		   ;Send("^t")
+		   ;Sleep($delay * 5)
+		   ;ClipPut("https://prospectedu-my.sharepoint.com/:x:/r/personal/william_christensen_prospecteducation_com/_layouts/15/Doc.aspx?sourcedoc=%7BAE32C238-0CF9-4E31-A2AF-75570AF50491%7D&file=Student%20Computer%20Tracking.xlsx")
+		   ;ClipPut("https://prospectedu-my.sharepoint.com/:x:/r/personal/william_christensen_prospecteducation_com/_layouts/15/doc2.aspx?sourcedoc=%7B45f2c78e-f62f-4d26-8d97-6b4615afb586%7D")
+		   ;Sleep($delay)
+		   ;Send("^v")
+		   ;Sleep($delay * 5)
+		   ;Send("{ENTER}")
+		   MsgBox($MB_SYSTEMMODAL, "", "Please open the 2023 Student Computer Tracking spreadsheet before continuing")
 		EndIf
 
    WinActivate($hWndWebpage, "")
 
-   Sleep($delay * 20)
-
-   ; Click Student Name Column
-   MouseClick("left", 620, 440, 1)
-
    Sleep($delay * 10)
 
+   Local $count = 0
+
+   While $count < 15
+	  Send("^{PGUP}")
+	  $count = $count + 1
+	  WEnd
+
+   Send("^{HOME}")
+   Send("^{UP}")
+   Send("^{UP}")
+
+   ; Click Student Name Column
+   ;MouseClick("left", 570, 330, 1)
+
+   Sleep($delay * 5)
+
    ; Go to the bottom of the column
+   Send("^{DOWN}")
+   Sleep($delay * 10)
    Send("^{DOWN}")
    Sleep($delay * 10)
    Send("{DOWN}")
@@ -307,14 +452,23 @@ Func spreadsheet()
 	  Send("{RIGHT}")
 
 	  ; Enter Campus
-	  Send("Van")
+	  ;Send("Van")
 
-	  Send("{RIGHT}")
+	  ;Send("{RIGHT}")
 
 	  ; Enter expected start date
-	  Send($aWords[$j][$i], 1)
+	  ;Send($aWords[$j][$i], 1)
 	  $i = $i + 1
 
+	  ;Send("{RIGHT}")
+
+	  ; Enter Program
+	  Send($aWords[$j][$i + 6], 1)
+	  If (($aWords[$j][$i + 6] == "CMOAA") Or ($aWords[$j][$i + 6] == "AASMBC") Or ($aWords[$j][$i + 6] == "AASMBCDC")) Then
+		 $bNumkey = True
+	  EndIf
+
+	  Send("{RIGHT}")
 	  Send("{RIGHT}")
 
 	  ; Enter in the shipping date
@@ -322,8 +476,9 @@ Func spreadsheet()
 
 	  Send("{RIGHT}")
 
-	  ; Enter Program
-	  Send($aWords[$j][$i + 6], 1)
+	  ; Enter Notes
+	  Send("Shipped from PSC")
+
 
 	  ; Go to next empty row
 	  Send("{DOWN}")
@@ -337,6 +492,10 @@ Func spreadsheet()
 	  $j = $j + 1
 	  $iRowNum = $iRowNum + 1
    WEnd
+
+   If $bNumkey Then
+	  MsgBox($MB_SYSTEMMODAL, "", "ALERT! At least one program needs a numkey pad!")
+   EndIf
 
    shipping()
 EndFunc
@@ -364,10 +523,19 @@ Func shipping()
    While $iRowNum < $rowNumber
 
 	  ; Click Shipping
-	  MouseClick("left", 465, 165, 1)
+	 ; MouseClick("left", 465, 165, 1)
 
 	  ; Click Create a Shipment
-	  MouseClick("left", 285, 311, 1)
+	  ;MouseClick("left", 285, 311, 1)
+
+	  ; Skip CAD Students
+	  While $aWords[$j][$i + 6] == "CAD"
+		 $j = $j + 1
+		 $iRowNum = $iRowNum + 1
+		 If $iRowNum < $rowNumber Then
+			Exit
+		 EndIf
+	  WEnd
 
 	  Sleep($delay * 20)
 
@@ -412,37 +580,54 @@ Func shipping()
 
 	  ; Weight
 	  Send("3")
-	  Call("sendTabs", 1)
+	  Call("sendTabs", 2)
 
 	  ; Dimensions
-	  Send("16")
-	  Send("{TAB}")
+	  If (($aWords[$j][10] == "CMOAA") Or ($aWords[$j][10] == "AASMBC") Or ($aWords[$j][10] == "AASMBCDC")) Then
+		 Send("18")
+		 Send("{TAB}")
 
-	  Send("9")
-	  Send("{TAB}")
+		 Send("12")
+		 Send("{TAB}")
 
-	  Send("3")
-	  Call("sendTabs", 3)
+		 Send("4")
+		 Call("sendTabs", 3)
+	  Else
+		 Send("18")
+		 Send("{TAB}")
+
+		 Send("12")
+		 Send("{TAB}")
+
+		 Send("4")
+		 Call("sendTabs", 3)
+
+	 EndIf
+
 
 	  ; Value
 	  Send("250")
 
 	  ; Navigate to Other Reference
-	  Call("sendTabs", 16)
+	  Call("sendTabs", 14)
 
 	  ; Value
 	  Send("Student Tablet")
+
+	  ; Schedule UPS Pickup
+	  Call("sendTabs", 4)
+	  Send("{SPACE}")
 
 	  $j = $j + 1
 	  $iRowNum = $iRowNum + 1
 
 	  ; Ask user to navigate to the UPS shipping page
-   $iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Ensure to put in the state and verify info" & @LF & "Continue the script after the current student is finished" & @LF & "Click Yes to continue the script")
+	  $iAnswer = MsgBox(BitOR($MB_YESNO, $MB_SYSTEMMODAL), "Student Info Grabber", "Ensure to put in the state and verify info" & @LF & "Continue the script after the current student is finished" & @LF & "Click Yes to continue the script")
 
-   ; If no (7), then terminate execution
-   If $iAnswer = 7 Then
-	   Exit
-	EndIf
+	  ; If no (7), then terminate execution
+	  If $iAnswer = 7 Then
+		 Exit
+	  EndIf
 
    WEnd
 
