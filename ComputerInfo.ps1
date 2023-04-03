@@ -1,6 +1,8 @@
 $HostName = Read-Host "Enter the host name / IP address"
+Clear-Host
 
 $SysArray = (
+    "All Info",
     "Host Name",
     "OS Version",
     "OS Manufacturer",
@@ -12,14 +14,16 @@ $SysArray = (
     "BIOS Version",
     "Total Physical Memory",
     "Domain",
-    "Logon Server"
+    "Logon Server",
+    "Change Host",
+    "Exit"
     )
     $Count = 0
     $SysArray.Length
 
 while($true)
 {
-    Write-Host "What would you like to see?"
+    Write-Host "What would you like to see with $($HostName)?"
     
     foreach($item in $SysArray)
     {
@@ -27,12 +31,27 @@ while($true)
         $Count++
     }
 
-    $Input = Read-Host "Enter"
+    $UserInput = Read-Host "Enter"
+    
+    Clear-Host
 
-    clear
-
-    systeminfo /s $HostName | find $SysArray[$Input]
+    if ($SysArray[$UserInput] -eq "Exit")
+    {
+        break;
+    }
+    elseif ($SysArray[$UserInput] -eq "Change Host")
+    {
+        $HostName = Read-Host "Enter the host name / IP address"
+    }
+    elseif ($SysArray[$UserInput] -eq "All Info")
+    {
+        systeminfo /s $HostName
+    }
+    else 
+    {
+        <# Action when all if and elseif conditions are false #>
+        systeminfo /s $HostName | find $SysArray[$UserInput]
+    }
     ''
     $Count = 0
 }
-
